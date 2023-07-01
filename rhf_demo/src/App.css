@@ -5,3 +5,34 @@
   text-align: center;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+label,
+input,
+button {
+  font: inherit;
+}
+
+label {
+  font-weight: 500;
+  margin: .5rem 0;
+}
+
+label,
+input {
+  display: block;
+}
+
+input {
+  min-width: 400px;
+  margin-bottom: .6rem;
+
+}
+button {
+  align-self: center;
+  margin-top: 0.8rem;
+}
