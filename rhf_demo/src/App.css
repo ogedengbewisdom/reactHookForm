@@ -29,10 +29,22 @@ input {
 
 input {
   min-width: 400px;
-  margin-bottom: .6rem;
-
+  outline: 1px solid #646cff;
+  border-radius: 2px;
 }
 button {
   align-self: center;
-  margin-top: 0.8rem;
+  margin-top: 0.1rem;
+}
+
+.form-control {
+  margin-bottom: 0;
+  font-weight: 500;
+  text-align: left;
+}
+
+.error {
+  color: red;
+  font-size: 1rem;
+  margin-top: 0.3rem;
 }
