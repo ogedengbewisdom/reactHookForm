@@ -1,4 +1,4 @@
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, FieldErrors } from "react-hook-form";
 import { DevTool } from "@hookform/devtools"
 import { Fragment } from "react";
 
@@ -47,28 +47,50 @@ export const YoutubeForm = () => {
   //     }
   //   }
   // });
-  const {register, control, handleSubmit, formState} = form;
+  const {register, control, handleSubmit, formState, watch, getValues, setValue, reset} = form;
 
-  const { errors } = formState
-
+  const { errors, isDirty, isValid, isSubmitting } = formState
+  
   const { fields, append, remove } = useFieldArray({
     name: "phNumbers",
     control
   })
 
+  const getValueHandler = () => {
+    console.log(getValues())
+  }
+
+  const setValueHandler = () => {
+    setValue("username", "", {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    })
+  }
+
   // useEffect(() => {
   //   console.log("CHEKING RERENDERING!")
   // }, [])
 
+  // const watchValue = watch()
+
+  const errorHandler = (errors: FieldErrors<FormValues>) => {
+    if(errors) {
+      console.log("Try to fill out the form please in correct order")
+    }
+  }
+
   const submitHandler = (data: FormValues) => {
     console.log(data)
+    reset()
   }
   rerender++
   
   return (
     <Fragment>
       <h1>YouTube Form ({rerender/2})</h1>
-      <form onSubmit={handleSubmit(submitHandler)} noValidate>
+      {/* <h2>{JSON.stringify(watchValue).split("").join(" ")}</h2> */}
+      <form onSubmit={handleSubmit(submitHandler, errorHandler)} noValidate>
         <div className='form-control'>
           <label htmlFor='username'>Username</label>
           <input type='text' id='username' {...register("username", {
@@ -104,7 +126,7 @@ export const YoutubeForm = () => {
 
         <div className="form-control">
           <label htmlFor='twitter'>Twitter</label>
-          <input type='text' id='twitter' {...register("social.twitter", {required: "Required twitter"})}/>
+          <input type='text' id='twitter' {...register("social.twitter", {required: "Required twitter", disabled: watch("channel") === ""})}/>
           {errors &&<p className="error">{errors.social?.twitter?.message}</p>}
         </div>
 
@@ -155,7 +177,9 @@ export const YoutubeForm = () => {
             })} />
           </div>
      
-          <button>Submit</button>
+          <button disabled={!isDirty || !isValid || isSubmitting}>Submit</button>
+          <button type="button" onClick={getValueHandler}>Get Values</button>
+          <button type="button" onClick={setValueHandler}>Set Values</button>
       </form>
       <DevTool control={control} />
     </Fragment>
