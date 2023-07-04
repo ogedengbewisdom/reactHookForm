@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { DevTool } from "@hookform/devtools"
 import { Fragment } from "react";
 
@@ -11,9 +11,11 @@ type FormValues = {
     facebook: string;
   };
   phoneNumbers: string[];
-  phNumbers: [
-    {numbers: string}
-  ]
+ phNumbers: {
+  numbers: string;
+ }[];
+ age: number;
+ dob: Date
 }
 
 let rerender = 0;
@@ -28,7 +30,9 @@ export const YoutubeForm = () => {
         facebook: ""
       },
       phoneNumbers: ["", ""],
-      phNumbers: [{numbers: ""}]
+      phNumbers: [{numbers: ""}],
+      age: 0,
+      dob: new Date()
     }
   });
 
@@ -47,13 +51,17 @@ export const YoutubeForm = () => {
 
   const { errors } = formState
 
+  const { fields, append, remove } = useFieldArray({
+    name: "phNumbers",
+    control
+  })
 
   // useEffect(() => {
   //   console.log("CHEKING RERENDERING!")
   // }, [])
 
   const submitHandler = (data: FormValues) => {
-    console.log(data.phoneNumbers[1])
+    console.log(data)
   }
   rerender++
   
@@ -117,6 +125,36 @@ export const YoutubeForm = () => {
           <input type='text' id='secondary-number' {...register("phoneNumbers.1", {required: "Required secondary-number"})}/>
           {errors &&<p className="error">{errors.phoneNumbers?.[1]?.message}</p>}
         </div>
+          
+          <div className="form-control">
+          <label>List of PhNumbers</label>
+            {fields.map((field, index) => {
+              return <div  key={field.id}>
+                <input type="text" id="phNumbers" {...register(`phNumbers.${index}.numbers` as const)} />
+                {index > 0 && <button type="button" onClick={() => remove(index)}>Delete</button>}
+              </div>
+            })}
+            <button onClick={() => append({numbers: ""})}>Add Phone Numbers</button>
+          </div>
+
+          <div className="form-control">
+            <label htmlFor="age">Age</label>
+            <input type="number" id="age" {...register("age", {
+              valueAsNumber: true,
+              required: "Age is required",
+              validate: (age) => age > 5 || "Try another age" 
+            })} />
+            {<p className="error">{errors.age?.message}</p>}
+          </div>
+
+          <div className="form-control">
+            <label htmlFor="dob">Date of Birth</label>
+            <input type="date" id="dob" {...register("dob", {
+              required: "Date of birth is required",
+              valueAsDate: true
+            })} />
+          </div>
+     
           <button>Submit</button>
       </form>
       <DevTool control={control} />
