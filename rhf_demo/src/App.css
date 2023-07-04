@@ -27,7 +27,7 @@ input {
   display: block;
 }
 
-.input {
+input {
   min-width: 400px;
   outline: 1px solid #646cff;
   border-radius: 2px;
