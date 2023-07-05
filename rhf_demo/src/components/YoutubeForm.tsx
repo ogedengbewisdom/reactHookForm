@@ -1,6 +1,6 @@
 import { useForm, useFieldArray, FieldErrors } from "react-hook-form";
 import { DevTool } from "@hookform/devtools"
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 
 type FormValues = {
   username: string;
@@ -33,7 +33,8 @@ export const YoutubeForm = () => {
       phNumbers: [{numbers: ""}],
       age: 0,
       dob: new Date()
-    }
+    },
+    mode: "onBlur"
   });
 
   // const form = useForm<FormValues>({
@@ -49,7 +50,7 @@ export const YoutubeForm = () => {
   // });
   const {register, control, handleSubmit, formState, watch, getValues, setValue, reset} = form;
 
-  const { errors, isDirty, isValid, isSubmitting } = formState
+  const { errors, isDirty, isValid, isSubmitting, isSubmitSuccessful } = formState
   
   const { fields, append, remove } = useFieldArray({
     name: "phNumbers",
@@ -74,6 +75,10 @@ export const YoutubeForm = () => {
 
   // const watchValue = watch()
 
+  const appendHandler = () => append({numbers: ""})
+
+ 
+
   const errorHandler = (errors: FieldErrors<FormValues>) => {
     if(errors) {
       console.log("Try to fill out the form please in correct order")
@@ -82,8 +87,13 @@ export const YoutubeForm = () => {
 
   const submitHandler = (data: FormValues) => {
     console.log(data)
-    reset()
   }
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset()
+    }
+  },[isSubmitSuccessful, reset])
   rerender++
   
   return (
@@ -112,8 +122,14 @@ export const YoutubeForm = () => {
             },
             validate: {
               adminValidate: (fieldValue) => fieldValue !== "admin@gmail.com" || "email preserved",
-              yahooValidate: (fieldValue) => !fieldValue.endsWith("@yahoo.com") || "yahoo not in use"
-            }
+              yahooValidate: (fieldValue) => !fieldValue.endsWith("@yahoo.com") || "yahoo not in use",
+              emailAvailable: async (email) => {
+                const response = await fetch(`https://jsonplaceholder.typicode.com/users?email=${email}`)
+                const data = await response.json()
+                console.log(data)
+                return data.length == 0 || "Email already existed"
+              }
+            },
           })} />
           {errors &&<p className="error">{errors.email?.message}</p>}
         </div>
@@ -156,7 +172,7 @@ export const YoutubeForm = () => {
                 {index > 0 && <button type="button" onClick={() => remove(index)}>Delete</button>}
               </div>
             })}
-            <button onClick={() => append({numbers: ""})}>Add Phone Numbers</button>
+            <button type="button" onClick={appendHandler}>Add Phone Numbers</button>
           </div>
 
           <div className="form-control">
@@ -177,7 +193,7 @@ export const YoutubeForm = () => {
             })} />
           </div>
      
-          <button disabled={!isDirty || !isValid || isSubmitting}>Submit</button>
+          <button disabled={!isDirty || isSubmitting}>Submit</button>
           <button type="button" onClick={getValueHandler}>Get Values</button>
           <button type="button" onClick={setValueHandler}>Set Values</button>
       </form>
